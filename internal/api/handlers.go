@@ -18,7 +18,7 @@ type URLUsecase interface {
 	GetOriginal(ctx context.Context, shortURL string) (string, error)
 }
 
-// API -
+// API - для обработки запросов по HTTP
 type API struct {
 	urlUsecase URLUsecase
 	logger     *slog.Logger

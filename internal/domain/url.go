@@ -6,7 +6,7 @@ import (
 	"regexp"
 )
 
-// URL - доменная модель, которая включает в себя оригинальный URL и его сокращенную версию
+// URL - доменная модель, которая включает в себя оригинальный URL и его укороченную версию
 type URL struct {
 	Original string `gorm:"column:original_url"`
 	Short    string `gorm:"column:short_url"`
@@ -33,7 +33,7 @@ func (ur *URL) ValidateOriginal() error {
 	return nil
 }
 
-// ValidateShort() - валидация оригинального URL
+// ValidateShort() - валидация укороченного URL
 func (ur *URL) ValidateShort() error {
 	const errPath = "domain: ValidateShort:"
 	if len(ur.Short) != LengthShortURL {
