@@ -1,0 +1,49 @@
+# docker compose для локальной разработки
+# здесь можно запустить контейнер приложения, postgresql и применить миграции
+services:
+  urlshortener:
+    container_name: urlshortener
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
+    ports:
+     - 8000:8000
+    volumes:
+      - ./configs:/app/configs
+    command: ["-config=configs/config.yaml", "-repo=postgresql"]
+    environment:
+      - POSTGRES_HOST=postgresql
+    depends_on:
+      postgresql:
+        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
+
+  postgresql:
+    image: postgres:18-alpine
+    container_name: postgresql
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: urls_db
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d urls_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  migrations:
+    image: migrate/migrate
+    container_name: migrations
+    volumes:
+      - ./migrations:/migrations
+    command: 
+      - -path=/migrations/
+      - -database=postgres://postgres:password@postgresql:5432/urls_db?sslmode=disable
+      - up
+      # - down # откатиться на конкретную версию
+      # - force # обозначить версию БД
+      # - "НОМЕР МИГРАЦИИ"
+    depends_on:
+      postgresql:
+        condition: service_healthy
